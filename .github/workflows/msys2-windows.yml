@@ -76,14 +76,20 @@ jobs:
           cmake -DCMAKE_FIND_LIBRARY_SUFFIXES='.a' -DICONV_INCLUDE_DIR:PATH=/mingw64/local/include -DICONV_LIBRARIES:FILEPATH=/mingw64/local/lib/libiconv.a -DOPENAL_INCLUDE_DIR:PATH=/C/_/openal/include -DOPENAL_LIBRARY:FILEPATH=/C/_/openal/lib/libOpenAL32.dll.a -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchains/mingw64-${{ matrix.arch }}.cmake -DCEN64_ARCH_SUPPORT:STRING=${{ matrix.extensions }} -DCMAKE_BUILD_TYPE=Release -G 'Unix Makefiles' ..
           make VERBOSE=1 -j4
 
-      - name: "Upload executable"
+      - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: windows-${{ matrix.arch }}-${{ matrix.extensions }}
-          path: C:/_/build/*.exe
+          path: |
+            C:/_/build/*.exe
+            C:/_/build/*.dll
 
-      - name: "Upload dll"
-        uses: actions/upload-artifact@v2
+      - name: Update nightly release
+        uses: eine/tip@master
         with:
-          name: windows-${{ matrix.arch }}-${{ matrix.extensions }}
-          path: C:/_/build/*.dll
+          tag: nightly
+          rm: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            C:/_/build/*.exe
+            C:/_/build/*.dll
